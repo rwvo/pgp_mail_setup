@@ -1,66 +1,99 @@
 # Using PGP Encryption in Apple Mail
-(with compliments from ChatGPT)
 
-## Prerequisites
-Before you can use PGP encryption in Apple Mail, you'll need:
+## 1. Generating a PGP Key Pair
 
-- **GnuPG (GPG)** installed on your Mac ([GPG Suite](https://gpgtools.org/) is a popular option).
-- A **PGP key pair** (public and private keys) generated for your email address.
-- **GPGMail**, a plugin for Apple Mail, which is part of GPG Suite.
+Before using PGP encryption in Apple Mail, you need to generate a PGP key pair.
 
-## Setting Up PGP in Apple Mail
+### Steps to Generate a PGP Key Pair
+1. Install **GnuPG** (GPG) if you haven't already:
+   ```sh
+   brew install gnupg
+   ```
+2. Generate a new key pair:
+   ```sh
+   gpg --full-generate-key
+   ```
+3. Follow the prompts to:
+   - Select key type (**RSA and RSA** recommended)
+   - Choose a key size (4096 bits recommended)
+   - Set an expiration date
+   - Enter your name and email address
+   - Set a strong passphrase
+4. List your generated keys:
+   ```sh
+   gpg --list-keys
+   ```
+   Note the key ID of your new key.
+5. Export your public key:
+   ```sh
+   gpg --armor --export your-key-id > public-key.asc
+   ```
+6. Export your private key (for backup, store securely!):
+   ```sh
+   gpg --armor --export-secret-key your-key-id > private-key.asc
+   ```
 
-1. **Install GPG Suite**:
-   - Download and install [GPG Suite](https://gpgtools.org/).
-   - Follow the setup instructions to generate or import your PGP key pair.
+## 2. Installing and Configuring GPG Suite for Apple Mail
 
-2. **Enable GPGMail in Apple Mail**:
-   - Open Apple Mail.
-   - Go to `Mail > Settings > Plugins` and ensure GPGMail is enabled.
+1. Download and install [GPG Suite](https://gpgtools.org/).
+2. Open **GPG Keychain** and import your generated key if it's not listed:
+   ```sh
+   gpg --import public-key.asc
+   gpg --import private-key.asc
+   ```
+3. Open **Apple Mail**, go to **Mail** > **Settings** > **GPG Mail**.
+4. Ensure your key is selected under **Default Key**.
 
-3. **Verify Your PGP Key**:
-   - Open `GPG Keychain`.
-   - Select your key and ensure it's correctly associated with your email.
+## 3. Using PGP Encryption in Apple Mail
 
-## Using PGP Encryption
+### Sending an Encrypted Email
+1. Compose a new email in **Apple Mail**.
+2. Ensure the recipient’s PGP public key is imported into your keychain:
+   ```sh
+   gpg --import recipient-public-key.asc
+   ```
+3. Click the **lock icon** in the message window to enable encryption.
+4. If the recipient has a PGP key, Apple Mail will encrypt the email.
+5. Click **Send**.
 
-### Encrypting an Email
-1. Open Apple Mail and compose a new email.
-2. Ensure the recipient's PGP public key is in your GPG Keychain.
-3. Click the **lock** icon to encrypt the message.
-4. Optionally, click the **sign** icon to digitally sign the email.
-5. Send the email.
+### Receiving and Decrypting an Email
+1. When receiving a PGP-encrypted email, open it in **Apple Mail**.
+2. Enter your passphrase when prompted to decrypt the message.
 
-### Decrypting an Email
-1. Open an encrypted email.
-2. If you have the corresponding private key, Apple Mail will automatically decrypt it.
-3. If prompted, enter your PGP passphrase.
+## 4. Publishing Your PGP Public Key
+To allow others to send you encrypted emails, publish your PGP public key:
 
-## Publishing Your PGP Public Key
-To allow others to send you encrypted emails, publish your public key:
-
-### 1. Upload to a Keyserver
-Run the following command in the terminal:
+### Keyservers
+Upload your key to a public keyserver:
 ```sh
- gpg --keyserver hkps://keys.openpgp.org --send-keys YOUR_KEY_ID
+ gpg --send-keys --keyserver keyserver.ubuntu.com your-key-id
 ```
 
-### 2. Share via Email or Website
-- Attach your public key file (`.asc`) to an email.
-- Host it on a personal website or GitHub profile.
+### Personal Website
+You can also publish your `public-key.asc` file on your personal website and share the URL.
 
-### 3. Add to Your Email Signature
-Include a link to your public key in your email signature:
-```plaintext
-PGP Public Key: https://example.com/yourkey.asc
-Fingerprint: ABCD 1234 EFGH 5678 IJKL 9012 MNOP 3456 QRST UVWX
+### Email Signature
+Include your public key fingerprint in your email signature:
+```
+PGP Fingerprint: ABCD 1234 EFGH 5678 IJKL 9012 MNOP 3456 QRST 7890
+Public Key: https://yourwebsite.com/your-public-key.asc
 ```
 
-## Additional Tips
-- Always verify public keys before encrypting messages.
-- Keep your private key secure and backed up.
-- Regularly update and refresh keyservers with your key if needed.
+## 5. Revoking a PGP Key
+If you need to revoke your key (e.g., lost key, compromised key):
+1. Generate a revocation certificate:
+   ```sh
+   gpg --output revoke.asc --gen-revoke your-key-id
+   ```
+2. Upload the revocation certificate to the keyserver:
+   ```sh
+   gpg --send-keys --keyserver keyserver.ubuntu.com your-key-id
+   ```
+3. Inform your contacts to stop using your revoked key.
 
-## References
-- [GPG Suite Documentation](https://gpgtools.org/)
-- [OpenPGP Keyservers](https://keys.openpgp.org/)
+## Conclusion
+By setting up PGP encryption in Apple Mail, you enhance your email security and ensure privacy in communications. Make sure to securely back up your private key and periodically refresh your encryption setup.
+
+---
+
+For additional information, refer to the [GPG Tools documentation](https://gpgtools.org/) and [GNU Privacy Handbook](https://www.gnupg.org/gph/en/manual.html).
